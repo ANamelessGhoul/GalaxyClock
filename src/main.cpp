@@ -77,10 +77,6 @@ int main(void)
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_WINDOW_TOPMOST | FLAG_WINDOW_UNDECORATED);
     InitWindow(screenWidth, screenHeight, "Galaxy Clock");
 
-    // InitAudioDevice();      // Initialize audio device
-
-    // SetWindowSize(630, 500);
-
     NGrandom::seed();
     for (size_t i = 0; i < star_count; i++)
     {
@@ -107,9 +103,8 @@ int main(void)
     // De-Initialization
     //--------------------------------------------------------------------------------------
 
-    // CloseAudioDevice();     // Close audio context
-
     CloseWindow();          // Close window and OpenGL context
+    
     //--------------------------------------------------------------------------------------
 
     return 0;
