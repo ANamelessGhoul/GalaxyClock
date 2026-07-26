@@ -19,6 +19,6 @@ endif ()
 
 add_subdirectory(src game)
 
-add_subdirectory(raylib-master raylib)
+add_subdirectory(raylib raylib)
 
 

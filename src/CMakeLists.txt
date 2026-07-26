@@ -8,6 +8,6 @@ target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 
-if (${CMAKE_BUILD_TYPE} MATCHES "Release" AND ${PLATFORM} MATCHES "Desktop")
+if (${CMAKE_BUILD_TYPE} MATCHES "Release" AND ${PLATFORM} MATCHES "Desktop" AND WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE "-Wl,--subsystem,windows")
 endif()
