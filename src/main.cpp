@@ -102,7 +102,7 @@ Vector2 GetRealMousePosition()
 {
     double xpos, ypos;
     glfwGetCursorPos((GLFWwindow*)GetWindowHandle(), &xpos, &ypos);
-    return (Vector2){(float)xpos, (float)ypos};
+    return CLITERAL(Vector2){(float)xpos, (float)ypos};
 }
 
 struct Time{
