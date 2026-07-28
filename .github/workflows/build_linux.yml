@@ -26,7 +26,6 @@ jobs:
       PROJECT_RELEASE_PATH: ${{ github.event.repository.name }}_dev_linux_x64
       PROJECT_RESOURCES_SRC_PATH: src/resources
       PROJECT_RESOURCES_DST_PATH: resources
-      PROJECT_CUSTOM_FLAGS: ""
 
     steps:
     - name: Checkout this repo
@@ -38,7 +37,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: raysan5/raylib
-        ref: "5.0"
+        ref: "5.5"
         path: ${{ env.PROJECT_REPO_NAME }}/raylib
         
     - name: Setup Release Paths
@@ -56,14 +55,11 @@ jobs:
         ls
       shell: bash
         
+    - name: CMake build
+      run: |
+        cmake ${{ env.PROJECT_REPO_NAME }} -B ${{ env.PROJECT_REPO_NAME }}/build
+        cmake --build ${{ env.PROJECT_REPO_NAME }}/build --config Release
 
-
-    - name: CMake Action
-      uses: threeal/cmake-action@v2.1.0
-      with:
-        source-dir: ${{ env.PROJECT_REPO_NAME }}
-        options: |
-          CMAKE_BUILD_TYPE=Release
 
   # Also add this if you have a resources folder, so it can be copied to the output
   # cp -r ${{ env.PROJECT_REPO_NAME }}/${{ env.PROJECT_RESOURCES_SRC_PATH }} ${{ env.PROJECT_RELEASE_PATH }}/${{ env.PROJECT_RESOURCES_DST_PATH }}
