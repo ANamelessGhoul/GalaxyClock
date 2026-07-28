@@ -1,8 +1,11 @@
 #include "raylib.h"
 #include "raymath.h"
-#include "local_time.h"
 #include "rlgl.h"
-#include "helpers.h"
+
+#include <stdlib.h>
+#include <time.h>
+
+#include "GLFW/glfw3.h"      
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -47,6 +50,45 @@ constexpr Rectangle minimize_button_rect = {
 
 
 
+namespace math
+{
+    template <typename T>
+    inline T max(T a, T b) {
+        return a > b ? a : b;
+    }
+
+    template <typename T>
+    inline T min(T a, T b) {
+        return a < b ? a : b;
+    }
+
+    template <typename T>
+    inline T wrap(T value, T lower, T upper) {
+        T range = upper - lower;
+        return lower + ((((value - lower) % range) + range) % range);
+    }
+} // namespace math
+
+namespace NGrandom
+{
+    inline void seed(){
+        srand(time(NULL));
+    }
+
+    // Random float between (0, 1)
+    inline float unsigned_float(){
+        return rand() / float(RAND_MAX);
+    }
+
+    // Random float between (-1, 1)
+    inline float signed_float(){
+        return -1.f + unsigned_float() * 2;
+    }
+
+} // namespace random
+
+
+
 Vector2 GetArmPosition(float time_ratio, float radius)
 {
     return {cosf((PI * 2) * time_ratio - PI / 2) * radius, sinf((PI * 2) * time_ratio - PI / 2) * radius};
@@ -54,6 +96,48 @@ Vector2 GetArmPosition(float time_ratio, float radius)
 
 void DrawFourStar(Vector2 position, float size, Color color = RAYWHITE);
 void DrawCross(Rectangle rect, Color color);
+
+// GetMousePosition uses the last received input event and doesn't account for the window moving while the mouse stays stationary
+Vector2 GetRealMousePosition()
+{
+    double xpos, ypos;
+    glfwGetCursorPos((GLFWwindow*)GetWindowHandle(), &xpos, &ypos);
+    return (Vector2){(float)xpos, (float)ypos};
+}
+
+struct Time{
+    unsigned int hours;
+    unsigned int minutes;
+    unsigned int seconds;
+    unsigned int milliseconds;
+};
+
+Time GetLocalTime()
+{
+    double time = glfwGetTime();
+    time_t now = static_cast<time_t>(time);
+
+    struct tm *tm_now = localtime(&now);
+
+    Time result;
+    result.hours = tm_now->tm_hour;
+    result.minutes = tm_now->tm_min;
+    result.seconds = tm_now->tm_sec;
+    double whole;
+    result.milliseconds = modf(glfwGetTime(), &whole) * 1000.f;
+
+    return result;
+}
+
+void InitTimer()
+{
+    time_t now;
+    time(&now);
+
+    glfwSetTime(now);
+
+}
+
 
 const Color background_color = GetColor(0x181818FF);
 constexpr size_t star_count = 100;
@@ -139,19 +223,25 @@ void UpdateDrawFrame()
     {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            mouse_monitor_position = Vector2Add(GetWindowPosition(), GetMousePosition());
             window_position = GetWindowPosition();
-        }
+            mouse_monitor_position = Vector2Add(window_position, GetRealMousePosition());
 
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
             is_dragging = true;
             SetTargetFPS(60);
-            Vector2 new_mouse_position = Vector2Add(GetWindowPosition(), GetMousePosition());
-            Vector2 mouse_delta = Vector2Subtract(new_mouse_position, mouse_monitor_position);
-            SetWindowPosition(window_position.x + mouse_delta.x, window_position.y + mouse_delta.y);
         }
-        else
+
+        if (is_dragging)
+        {
+            Vector2 new_mouse_monitor_position = Vector2Add(window_position, GetRealMousePosition());
+            Vector2 mouse_delta = Vector2Subtract(new_mouse_monitor_position, mouse_monitor_position);
+            
+            window_position = Vector2Add(window_position, mouse_delta);
+            SetWindowPosition(window_position.x, window_position.y);
+
+            mouse_monitor_position = new_mouse_monitor_position;
+        }
+
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         {
             SetTargetFPS(target_fps);
             

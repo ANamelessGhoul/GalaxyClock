@@ -1,5 +1,6 @@
-raylib-master
+raylib
 bin
 build
 build-web
 .vs
+.cache
